@@ -5,107 +5,135 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * This class represents a Perceptron, a simple machine learning algorithm for binary classification.
+ * // Ta klasa reprezentuje perceptron, prosty algorytm uczenia maszynowego do binarnej klasyfikacji.
+ */
 public class Perceptron {
-    private double[] weights;
-    private double learningRate;
-    private int epochs;
+    private double[] weights; // Wagi perceptronu
+    private double learningRate; // Współczynnik uczenia perceptronu
+    private int epochs; // Liczba epok uczenia
 
+    /**
+     * Constructs a new Perceptron with the given learning rate and number of epochs.
+     * // Konstruuje nowy perceptron z podanym współczynnikiem uczenia i liczbą epok.
+     *
+     * @param learningRate the learning rate
+     * @param epochs       the number of training epochs
+     */
     public Perceptron(double learningRate, int epochs) {
         this.learningRate = learningRate;
         this.epochs = epochs;
     }
 
+    /**
+     * Runs the training and testing process of the Perceptron.
+     * // Uruchamia proces uczenia i testowania perceptronu.
+     *
+     * @param trainFile the path to the training file
+     * @param testFile  the path to the testing file
+     */
     public void runTrainingAndTesting(String trainFile, String testFile) {
-        List<double[]> X_train = new ArrayList<>();
-        List<double[]> X_test = new ArrayList<>();
-        List<Integer> y_train = new ArrayList<>();
-        List<Integer> y_test = new ArrayList<>();
+        var trainingData = loadDataset(trainFile);
+        var testingData = loadDataset(testFile);
 
-        loadDataset(trainFile, X_train, y_train);
-        loadDataset(testFile, X_test, y_test);
-
-        trainPerceptron(X_train, y_train.stream().mapToInt(i -> i).toArray());
-        testPerceptron(X_test, y_test.stream().mapToInt(i -> i).toArray());
+        trainPerceptron(trainingData);
+        testPerceptron(testingData);
     }
 
-    private void loadDataset(String filename, List<double[]> X, List<Integer> y) {
+    /**
+     * Loads a dataset from a file.
+     * // Wczytuje zbiór danych z pliku.
+     *
+     * @param filename the path to the file
+     * @return a list of data points
+     */
+    private List<DataPoint> loadDataset(String filename) {
+        var dataPoints = new ArrayList<DataPoint>();
         try {
-            List<String> lines = Files.lines(Paths.get(filename)).toList();
-            for (String line : lines) {
-                String[] values = line.split(",");
-                double[] features = new double[values.length - 1];
+            Files.lines(Paths.get(filename)).forEach(line -> {
+                var values = line.split(",");
+                var features = new double[values.length - 1];
                 for (int i = 0; i < features.length; i++) {
                     features[i] = Double.parseDouble(values[i]);
                 }
-                X.add(features);
-                y.add(Integer.parseInt(values[values.length - 1]));
-            }
+                dataPoints.add(new DataPoint(features, Integer.parseInt(values[values.length - 1])));
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return dataPoints;
     }
 
-
-    private void initializeWeights(int size) {
-        weights = new double[size];
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] = Math.random() * 0.2 - 0.1; // small random initialization
-        }
-    }
-
-    private void trainPerceptron(List<double[]> X, int[] y) {
-        initializeWeights(X.get(0).length + 1);
+    /**
+     * Trains the Perceptron on the given data points.
+     * // Uczy perceptron na podanych punktach danych.
+     *
+     * @param dataPoints the data points
+     */
+    private void trainPerceptron(List<DataPoint> dataPoints) {
+        weights = new double[dataPoints.get(0).features.length + 1]; // inicjalizuje wagi na zera
         for (int epoch = 0; epoch < epochs; epoch++) {
-            shuffleData(X, y);
-            for (int i = 0; i < X.size(); i++) {
-                updateWeights(X.get(i), y[i]);
-            }
-            double accuracy = testPerceptron(X, y);
-            System.out.println("Accuracy for epoch " + (epoch + 1) + ": " + accuracy);
+            dataPoints.forEach(this::updateWeights); // aktualizuje wagi dla każdego punktu danych
+            System.out.println("Accuracy for epoch " + (epoch + 1) + ": " + testPerceptron(dataPoints));
         }
     }
 
-    private void shuffleData(List<double[]> X, int[] y) {
-        for (int i = X.size() - 1; i > 0; i--) {
-            int index = (int) (Math.random() * (i + 1));
-            double[] tempX = X.get(index);
-            X.set(index, X.get(i));
-            X.set(i, tempX);
-            int tempY = y[index];
-            y[index] = y[i];
-            y[i] = tempY;
-        }
-    }
-
-    private void updateWeights(double[] xi, int target) {
-        double update = learningRate * (target - predict(xi));
-        for (int j = 0; j < xi.length; j++) {
-            weights[j + 1] += update * xi[j];
+    /**
+     * Updates the weights of the Perceptron based on a single data point.
+     * // Aktualizuje wagi perceptronu na podstawie pojedynczego punktu danych.
+     *
+     * @param dataPoint the data point
+     */
+    private void updateWeights(DataPoint dataPoint) {
+        double update = learningRate * (dataPoint.label - predict(dataPoint.features));
+        for (int j = 0; j < dataPoint.features.length; j++) {
+            weights[j + 1] += update * dataPoint.features[j];
         }
         weights[0] += update; // bias
     }
 
-    private int predict(double[] X) {
+    /**
+     * Predicts the label of a data point based on its features.
+     * // Przewiduje etykietę punktu danych na podstawie jego cech.
+     *
+     * @param features the features of the data point
+     * @return the predicted label (1 or 0)
+     */
+    private int predict(double[] features) {
         double activation = weights[0];
-        for (int i = 0; i < X.length; i++) {
-            activation += weights[i + 1] * X[i];
+        for (int i = 0; i < features.length; i++) {
+            activation += weights[i + 1] * features[i];
         }
         return activation >= 0 ? 1 : 0;
     }
 
-    private double testPerceptron(List<double[]> X, int[] y) {
-        int correctPredictions = 0;
-        for (int i = 0; i < X.size(); i++) {
-            int prediction = predict(X.get(i));
-            if (prediction == y[i]) {
-                correctPredictions++;
-            }
-        }
-        return (double) correctPredictions / X.size();
+    /**
+     * Tests the Perceptron on the given data points and returns the accuracy.
+     * // Metoda testująca Perceptron na podanych punktach danych i zwracająca dokładność.
+     *
+     * @param dataPoints the data points
+     * @return the accuracy
+     */
+    private double testPerceptron(List<DataPoint> dataPoints) {
+        // Liczymy ilość poprawnych przewidywań, sprawdzając, czy przewidziana etykieta odpowiada rzeczywistej etykiecie.
+        // Считаем количество правильных предсказаний, проверяя, совпадает ли предсказанная метка с фактической меткой.
+        long correctPredictions = dataPoints.stream().filter(dataPoint -> predict(dataPoint.features) == dataPoint.label).count();
+
+        // Obliczamy dokładność, dzieląc ilość poprawnych przewidywań przez całkowitą liczbę punktów danych.
+        // Вычисляем точность, разделяя количество правильных предсказаний на общее количество точек данных.
+        return (double) correctPredictions / dataPoints.size();
     }
 
+
+    /**
+     * The main method. It prompts the user to enter the learning rate, number of epochs, and paths to the training and testing files.
+     * // Metoda główna. Prosi użytkownika o podanie współczynnika uczenia, liczby epok oraz ścieżek do plików treningowych i testowych.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        var scanner = new Scanner(System.in);
 
         System.out.print("Enter learning rate: ");
         double learningRate = scanner.nextDouble();
@@ -113,16 +141,50 @@ public class Perceptron {
         System.out.print("Enter number of epochs: ");
         int epochs = scanner.nextInt();
 
-        String trainFilePath = scanner.nextLine();
         System.out.print("Enter path to the training file: ");
-        trainFilePath = scanner.nextLine();
+        String trainFilePath = scanner.next();
 
         System.out.print("Enter path to the testing file: ");
-        String testFilePath = scanner.nextLine();
+        String testFilePath = scanner.next();
 
-        Perceptron perceptron = new Perceptron(learningRate, epochs);
-        perceptron.runTrainingAndTesting(trainFilePath, testFilePath);
+        new Perceptron(learningRate, epochs).runTrainingAndTesting(trainFilePath, testFilePath);
+    }
 
-        scanner.close();
+    /**
+     * This class represents a data point with features and a label.
+     * // Ta klasa reprezentuje punkt danych z cechami i etykietą.
+     */
+    private static class DataPoint {
+        double[] features; // Cechy punktu danych
+        int label; // Etykieta punktu danych
+
+        /**
+         * Constructs a new DataPoint with the given features and label.
+         * // Konstruuje nowy punkt danych z podanymi cechami i etykietą.
+         *
+         * @param features the features
+         * @param label    the label
+         */
+        DataPoint(double[] features, int label) {
+            this.features = features;
+            this.label = label;
+        }
     }
 }
+
+/**
+ * Tests the Perceptron on the given data points and returns the accuracy.
+ * // Metoda testująca Perceptron na podanych punktach danych i zwracająca dokładność.
+ * <p>
+ * This method calculates the accuracy of the Perceptron model by comparing the predicted labels
+ * to the actual labels of the given data points. It iterates through each data point, predicts its
+ * label using the predict method, and checks if the predicted label matches the actual label. It
+ * then counts the number of correct predictions and divides it by the total number of data points
+ * to calculate the accuracy. Finally, it returns the accuracy as a double value.
+ * // Ta metoda oblicza dokładność modelu Perceptronu, porównując przewidywane etykiety
+ * do rzeczywistych etykiet podanych punktów danych. Iteruje przez każdy punkt danych, przewiduje
+ * jego etykietę za pomocą metody predict, sprawdza, czy przewidziana etykieta odpowiada rzeczywistej
+ * etykiecie. Następnie liczy liczbę poprawnych przewidywań i dzieli ją przez całkowitą liczbę punktów
+ * danych, aby obliczyć dokładność. Na koniec zwraca dokładność jako wartość double.
+ */
+
