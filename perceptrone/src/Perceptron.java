@@ -48,7 +48,7 @@ public class Perceptron {
      * @param filename the path to the file
      * @return a list of data points
      */
-    private List<DataPoint> loadDataset(String filename) {
+    public List<DataPoint> loadDataset(String filename) {
         var dataPoints = new ArrayList<DataPoint>();
         try {
             Files.lines(Paths.get(filename)).forEach(line -> {
@@ -71,7 +71,7 @@ public class Perceptron {
      *
      * @param dataPoints the data points
      */
-    private void trainPerceptron(List<DataPoint> dataPoints) {
+    public void trainPerceptron(List<DataPoint> dataPoints) {
         weights = new double[dataPoints.get(0).features.length + 1]; // inicjalizuje wagi na zera
         for (int epoch = 0; epoch < epochs; epoch++) {
             dataPoints.forEach(this::updateWeights); // aktualizuje wagi dla każdego punktu danych
@@ -100,7 +100,7 @@ public class Perceptron {
      * @param features the features of the data point
      * @return the predicted label (1 or 0)
      */
-    private int predict(double[] features) {
+    public int predict(double[] features) {
         double activation = weights[0];
         for (int i = 0; i < features.length; i++) {
             activation += weights[i + 1] * features[i];
@@ -115,7 +115,7 @@ public class Perceptron {
      * @param dataPoints the data points
      * @return the accuracy
      */
-    private double testPerceptron(List<DataPoint> dataPoints) {
+    public double testPerceptron(List<DataPoint> dataPoints) {
         // Liczymy ilość poprawnych przewidywań, sprawdzając, czy przewidziana etykieta odpowiada rzeczywistej etykiecie.
         // Считаем количество правильных предсказаний, проверяя, совпадает ли предсказанная метка с фактической меткой.
         long correctPredictions = dataPoints.stream().filter(dataPoint -> predict(dataPoint.features) == dataPoint.label).count();
@@ -123,6 +123,20 @@ public class Perceptron {
         // Obliczamy dokładność, dzieląc ilość poprawnych przewidywań przez całkowitą liczbę punktów danych.
         // Вычисляем точность, разделяя количество правильных предсказаний на общее количество точек данных.
         return (double) correctPredictions / dataPoints.size();
+    }
+
+    public void askForAttributesAndPredict() {
+        Scanner scanner = new Scanner(System.in);
+        double[] attributes = new double[this.weights.length - 1]; // Assuming you have 16 attributes
+
+        System.out.println("Please enter the attributes:");
+        for (int i = 0; i < attributes.length; i++) {
+            System.out.print("Attribute " + (i + 1) + ": ");
+            attributes[i] = scanner.nextDouble();
+        }
+
+        int prediction = predict(attributes);
+        System.out.println("Predicted class: " + prediction);
     }
 
 
@@ -147,28 +161,9 @@ public class Perceptron {
         System.out.print("Enter path to the testing file: ");
         String testFilePath = scanner.next();
 
-        new Perceptron(learningRate, epochs).runTrainingAndTesting(trainFilePath, testFilePath);
-    }
-
-    /**
-     * This class represents a data point with features and a label.
-     * // Ta klasa reprezentuje punkt danych z cechami i etykietą.
-     */
-    private static class DataPoint {
-        double[] features; // Cechy punktu danych
-        int label; // Etykieta punktu danych
-
-        /**
-         * Constructs a new DataPoint with the given features and label.
-         * // Konstruuje nowy punkt danych z podanymi cechami i etykietą.
-         *
-         * @param features the features
-         * @param label    the label
-         */
-        DataPoint(double[] features, int label) {
-            this.features = features;
-            this.label = label;
-        }
+        Perceptron perceptron = new Perceptron(learningRate, epochs);
+        perceptron.runTrainingAndTesting(trainFilePath, testFilePath);
+        perceptron.askForAttributesAndPredict();
     }
 }
 
@@ -187,4 +182,5 @@ public class Perceptron {
  * etykiecie. Następnie liczy liczbę poprawnych przewidywań i dzieli ją przez całkowitą liczbę punktów
  * danych, aby obliczyć dokładność. Na koniec zwraca dokładność jako wartość double.
  */
+
 
