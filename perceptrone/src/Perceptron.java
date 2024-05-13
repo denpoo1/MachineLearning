@@ -57,7 +57,7 @@ public class Perceptron {
                 for (int i = 0; i < features.length; i++) {
                     features[i] = Double.parseDouble(values[i]);
                 }
-                dataPoints.add(new DataPoint(features, Integer.parseInt(values[values.length - 1])));
+                dataPoints.add(new DataPoint(features, values[values.length - 1]));
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,7 +72,7 @@ public class Perceptron {
      * @param dataPoints the data points
      */
     public void trainPerceptron(List<DataPoint> dataPoints) {
-        weights = new double[dataPoints.get(0).features.length + 1]; // inicjalizuje wagi na zera
+        weights = new double[dataPoints.get(0).getFeatures().length + 1]; // inicjalizuje wagi na zera
         for (int epoch = 0; epoch < epochs; epoch++) {
             dataPoints.forEach(this::updateWeights); // aktualizuje wagi dla każdego punktu danych
             System.out.println("Accuracy for epoch " + (epoch + 1) + ": " + testPerceptron(dataPoints));
@@ -86,9 +86,9 @@ public class Perceptron {
      * @param dataPoint the data point
      */
     private void updateWeights(DataPoint dataPoint) {
-        double update = learningRate * (dataPoint.label - predict(dataPoint.features));
-        for (int j = 0; j < dataPoint.features.length; j++) {
-            weights[j + 1] += update * dataPoint.features[j];
+        double update = learningRate * (dataPoint.getLabel() - predict(dataPoint.getFeatures()));
+        for (int j = 0; j < dataPoint.getFeatures().length; j++) {
+            weights[j + 1] += update * dataPoint.getFeatures()[j];
         }
         weights[0] += update; // bias
     }
@@ -118,7 +118,7 @@ public class Perceptron {
     public double testPerceptron(List<DataPoint> dataPoints) {
         // Liczymy ilość poprawnych przewidywań, sprawdzając, czy przewidziana etykieta odpowiada rzeczywistej etykiecie.
         // Считаем количество правильных предсказаний, проверяя, совпадает ли предсказанная метка с фактической меткой.
-        long correctPredictions = dataPoints.stream().filter(dataPoint -> predict(dataPoint.features) == dataPoint.label).count();
+        long correctPredictions = dataPoints.stream().filter(dataPoint -> predict(dataPoint.getFeatures()) == dataPoint.getLabel()).count();
 
         // Obliczamy dokładność, dzieląc ilość poprawnych przewidywań przez całkowitą liczbę punktów danych.
         // Вычисляем точность, разделяя количество правильных предсказаний на общее количество точек данных.
@@ -136,7 +136,13 @@ public class Perceptron {
         }
 
         int prediction = predict(attributes);
-        System.out.println("Predicted class: " + prediction);
+
+        String allLabels = "";
+        if (DataPoint.getLabelTypeEnum().equals(LabelTypeEnum.STRING_LABEL)) {
+            allLabels = DataPoint.getCurrentStringLabels().toString();
+        }
+
+        System.out.println("Predicted class: " + prediction + "\n" + allLabels);
     }
 
 
