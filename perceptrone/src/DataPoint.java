@@ -2,19 +2,17 @@ import java.util.HashMap;
 
 /**
  * This class represents a data point with features and a label.
- * // Ta klasa reprezentuje punkt danych z cechami i etykietą.
+ * // Класс представляет точку данных с признаками и меткой.
  */
-
 public class DataPoint {
-    private double[] features; // Cechy punktu danych
-    private double label; // Etykieta punktu danych
+    private double[] features; // Признаки точки данных
+    private double label; // Метка точки данных
     private static HashMap<String, Integer> CURRENT_STRING_LABELS = new HashMap<>();
     private static LabelTypeEnum LABEL_TYPE_ENUM;
 
-
     /**
      * Constructs a new DataPoint with the given features and label.
-     * // Konstruuje nowy punkt danych z podanymi cechami i etykietą.
+     * // Создает новую точку данных с указанными признаками и меткой.
      *
      * @param features the features
      * @param label    the label
@@ -31,11 +29,11 @@ public class DataPoint {
         if (CURRENT_STRING_LABELS.containsKey(label)) {
             this.label = CURRENT_STRING_LABELS.get(label);
         } else if (!CURRENT_STRING_LABELS.isEmpty()) {
-            CURRENT_STRING_LABELS.put(label, 2);
-            this.label = 2;
-        } else {
             CURRENT_STRING_LABELS.put(label, 1);
             this.label = 1;
+        } else {
+            CURRENT_STRING_LABELS.put(label, 0);
+            this.label = 0;
         }
     }
 
