@@ -18,39 +18,91 @@ public class KnapsackBruteForce {
      * @param items The list of items, where each item has a weight and a value.
      */
     public static void knapsackBruteForce(int capacity, List<Item> items) {
-        int n = items.size();
-        int bestValue = 0;
-        int bestWeight = 0;
-        List<Integer> bestCombination = new ArrayList<>();
-        long startTime = System.currentTimeMillis();
+        int n = items.size(); // Количество предметов
+        int bestValue = 0; // Лучшая найденная ценность
+        int bestWeight = 0; // Вес лучшего найденного набора предметов
+        List<Integer> bestCombination = new ArrayList<>(); // Лучшая комбинация предметов
+        long startTime = System.currentTimeMillis(); // Время начала выполнения
 
-        // Generate all possible combinations of items
-        for (int i = 1; i < (1 << n); i++) {
-            int totalWeight = 0;
-            int totalValue = 0;
-            List<Integer> currentCombination = new ArrayList<>();
+        // Генерация всех возможных комбинаций предметов
+        /**
+         * 1 << n это 2^n, так как каждый предмет может быть включен или не включен в комбинацию.
+         * Поэтому всего возможно 2^n комбинаций.
+         * Например, если n = 3, то 1 << 3 = 8, что соответствует 2^3 = 8 комбинациям.
+         */
+        for (int i = 1; i < (1 << n); i++) { // Проход по всем подмножествам (1 << n это 2^n)
+            int totalWeight = 0; // Текущий суммарный вес
+            int totalValue = 0; // Текущая суммарная ценность
+            List<Integer> currentCombination = new ArrayList<>(); // Текущая комбинация
 
-            for (int j = 0; j < n; j++) {
-                if ((i & (1 << j)) != 0) {
-                    totalWeight += items.get(j).weight;
-                    totalValue += items.get(j).value;
-                    currentCombination.add(1);
+            for (int j = 0; j < n; j++) { // Проход по каждому предмету
+                /**
+                 * Например i = 5 (101 в двоичной системе) и j = 0, 1, 2.
+                 * Пример 1: i = 5, j = 0, j = 1, j = 2
+                 * Значения:
+                 *
+                 *     i = 5 (в двоичном виде 101)
+                 *
+                 * Проверка:
+                 *
+                 *     j = 0
+                 *         1 << 0 = 001 (в двоичном виде)
+                 *         i & (1 << 0) = 101 & 001 = 001 (не равно 0)
+                 *         Бит на позиции 0 установлен, значит, первый предмет включен.
+                 *
+                 *     j = 1
+                 *         1 << 1 = 010 (в двоичном виде)
+                 *         i & (1 << 1) = 101 & 010 = 000 (равно 0)
+                 *         Бит на позиции 1 не установлен, значит, второй предмет не включен.
+                 *
+                 *     j = 2
+                 *         1 << 2 = 100 (в двоичном виде)
+                 *         i & (1 << 2) = 101 & 100 = 100 (не равно 0)
+                 *         Бит на позиции 2 установлен, значит, третий предмет включен.
+                 *
+                 * Пример 2: i = 3, j = 0, j = 1, j = 2
+                 * Значения:
+                 *
+                 *     i = 3 (в двоичном виде 011)
+                 *
+                 * Проверка:
+                 *
+                 *     j = 0
+                 *         1 << 0 = 001 (в двоичном виде)
+                 *         i & (1 << 0) = 011 & 001 = 001 (не равно 0)
+                 *         Бит на позиции 0 установлен, значит, первый предмет включен.
+                 *
+                 *     j = 1
+                 *         1 << 1 = 010 (в двоичном виде)
+                 *         i & (1 << 1) = 011 & 010 = 010 (не равно 0)
+                 *         Бит на позиции 1 установлен, значит, второй предмет включен.
+                 *
+                 *     j = 2
+                 *         1 << 2 = 100 (в двоичном виде)
+                 *         i & (1 << 2) = 011 & 100 = 000 (равно 0)
+                 *         Бит на позиции 2 не установлен, значит, третий предмет не включен.
+                 */
+                if ((i & (1 << j)) != 0) { // Проверка, включен ли предмет в текущую комбинацию
+                    totalWeight += items.get(j).weight; // Добавление веса предмета
+                    totalValue += items.get(j).value; // Добавление ценности предмета
+                    currentCombination.add(1); // Предмет включен в комбинацию
                 } else {
-                    currentCombination.add(0);
+                    currentCombination.add(0); // Предмет не включен в комбинацию
                 }
             }
 
+            // Обновление лучшего набора предметов, если текущий лучше
             if (totalWeight <= capacity && totalValue > bestValue) {
-                bestValue = totalValue;
-                bestWeight = totalWeight;
-                bestCombination = new ArrayList<>(currentCombination);
+                bestValue = totalValue; // Обновление лучшей ценности
+                bestWeight = totalWeight; // Обновление лучшего веса
+                bestCombination = new ArrayList<>(currentCombination); // Обновление лучшей комбинации
             }
         }
 
-        long endTime = System.currentTimeMillis();
-        double executionTime = (endTime - startTime) / 1000.0;
+        long endTime = System.currentTimeMillis(); // Время окончания выполнения
+        double executionTime = (endTime - startTime) / 1000.0; // Расчет времени выполнения
 
-        // Output the best combination, total weight, total value, and execution time
+        // Вывод результатов
         System.out.println("Best characteristic vector: " + bestCombination);
         System.out.println("Total weight: " + bestWeight);
         System.out.println("Total value: " + bestValue);
