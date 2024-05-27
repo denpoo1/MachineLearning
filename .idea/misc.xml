@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/single-layer-neural-network/pom.xml" />
+        <option value="$PROJECT_DIR$/backpack_problem/pom.xml" />
       </list>
     </option>
   </component>
