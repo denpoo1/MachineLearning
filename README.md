@@ -1,3 +1,5 @@
+![Logo](https://giffiles.alphacoders.com/215/215462.gif)
+
 # ML Repository overview
 
 in this repository I practiced implementing machine learning algorithms.
@@ -6,11 +8,6 @@ in this repository I practiced implementing machine learning algorithms.
 Perceptron - a simple machine learning algorithm used for classification tasks. In the context of animals based on 10 factors (e.g., animal characteristics), the perceptron can be trained to classify observations into different classes (e.g., animal species).
 
 ### Path to my solution: / -> perceptrone
-
-## Neural Network
-Neural Network - a machine learning algorithm inspired by the human brain. It consists of interconnected nodes (or neurons) organized in layers. Each neuron processes input data, performs computations, and passes output data to the next layer. Neural networks are used for various tasks such as pattern recognition, data classification, and prediction.
-
-### Path to my solution: ./ -> perceptrone
 
 ## Backpack Problem
 Backpack Problem - a combinatorial optimization problem where one must select a specific set of items given limited resources (e.g., backpack capacity or budget) to maximize value (or minimize weight).
